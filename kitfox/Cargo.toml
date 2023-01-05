@@ -1,0 +1,13 @@
+[package]
+name = "kitfox"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+kitfoxm = { path = "../kitfoxm" }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+zbus = { version = "3", default-features = false, features = ["tokio"] }
+futures = "0.3"

@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+    "kitfox",
+    "kitfoxd",
+    "kitfoxi",
+    "kitfoxm",
+    "kitfoxm_derive",
+]
