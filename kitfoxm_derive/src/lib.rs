@@ -290,6 +290,14 @@ fn impl_resource(ast: &syn::DeriveInput) -> TokenStream {
             }// macro match case
         } // macro-rules actions
 
+        // FINDME: New Actions
+        // Add every new action that a Resource can support to this macro.
+        //
+        // Identifier action is not required, that is implemented manually by the derive
+        // macro so that a default implementation can be provided.
+        //
+        // SupportedActions is required here but is also implemented manually by the derive
+        // macro so that a default implementation can be provided.
         actions!(SupportedActions, Identify, Erase);
     }; // quote
 
