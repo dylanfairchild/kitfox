@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="166.20213"
+   height="225.18193"
+   viewBox="0 0 43.974315 59.579387"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="drawing-1.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.829812"
+     inkscape:cx="222.42722"
+     inkscape:cy="174.88135"
+     inkscape:window-width="2516"
+     inkscape:window-height="1355"
+     inkscape:window-x="71"
+     inkscape:window-y="40"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-0.21628995,-0.21156816)">
+    <rect
+       style="fill:#4d4d4d;stroke-width:22.0218"
+       id="rect234"
+       width="43.974316"
+       height="59.579388"
+       x="0.21628995"
+       y="0.21156816"
+       ry="4.3092051" />
+    <text
+       xml:space="preserve"
+       style="font-size:8.46667px;font-family:'Common Sans';-inkscape-font-specification:'Common Sans, Normal';text-align:center;text-anchor:middle;fill:#4d4d4d;stroke-width:22.0218"
+       x="22.292545"
+       y="33.113274"
+       id="text554"><tspan
+         sodipodi:role="line"
+         id="tspan552"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.9333px;font-family:'Common Sans';-inkscape-font-specification:'Common Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:22.0218"
+         x="22.292545"
+         y="33.113274">SSD</tspan></text>
+  </g>
+</svg>

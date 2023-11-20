@@ -14,14 +14,14 @@ trait ResourceService {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let connection = Connection::session().await?;
-
+    let connection = Connection::system().await?;
     let mut proxy = ResourceServiceProxy::new(&connection).await?;
     let reply = proxy.scan().await?;
 
     println!("Scan Reply: {}", reply);
     let parsed: Vec<ResourceIdentifier> = serde_json::from_str(&reply).unwrap();
 
+    let mut reqp = RequestPayload { payload: vec![] };
     for identifier in parsed {
         let idp = IdentifierPayload {
             identifier: identifier,
@@ -32,20 +32,16 @@ async fn main() -> Result<()> {
                 ActionPayload::SupportedActionsArgs(Default::default()),
             ],
         };
-        let payload = RequestPayload { payload: vec![idp] };
-        let payload = serde_json::to_string(&payload).unwrap();
-        let other_payload = payload.clone();
-        let other_other_payload = payload.clone();
-        let future1 = proxy.request(&payload);
-        let future2 = proxy.request(&other_payload);
-        let future3 = proxy.request(&other_other_payload);
-        let futures = vec![future1, future2, future3];
-
-        let replies = futures::future::join_all(futures).await;
-        for reply in replies {
-            println!("Reply: {}", reply.unwrap());
-        }
+        reqp.payload.push(idp);
     }
+    let payload = serde_json::to_string(&reqp).unwrap();
+    println!("Payload OUT: {}", payload);
+    let future = proxy.request(&payload);
+    let futures = vec![future];
+    let replies = futures::future::join_all(futures).await;
+    // for reply in replies {
+    //     println!("Reply: {}", reply.unwrap());
+    // }
 
     Ok(())
 }

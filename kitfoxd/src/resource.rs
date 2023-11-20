@@ -1,9 +1,7 @@
-pub mod in_tree_nvme;
-
-use crate::resource::in_tree_nvme::find_in_tree_nvme_devices;
 use kitfoxm::actions::{
     ActionPayload, IdentifierArgs, IdentifierPayload, RequestPayload, Resource, ResourceIdentifier,
 };
+use kitfoxr;
 use std::collections::HashMap;
 
 pub struct ResourceManager {
@@ -65,6 +63,8 @@ impl ResourceManager {
         identifier: &ResourceIdentifier,
         payload: &ActionPayload,
     ) -> ActionPayload {
+        // TODO: Should request/action/actions be locked? So that only one is going to a resource
+        //       at a time? Or should an individual resource be locked?
         if let Some(rsc) = self.resources.get(identifier) {
             return rsc.action(payload);
         }
@@ -72,12 +72,19 @@ impl ResourceManager {
     }
 
     pub fn scan(&mut self) -> Vec<ResourceIdentifier> {
+        //TODO: Need lock on this because self.resources should not be modified from 2 threads at once?
+        //      Maybe need to copy out our resource to run whatever needs to be run on it so scans can
+        //      happen while things are outstanding.
+        //
+        // Box should already reference count, right? So I don't know if we need to copy it.
+        // Other methods don't mutate resources, only read from it... maybe it is safe?
+
         let mut new_resources: HashMap<ResourceIdentifier, Box<dyn Resource + Send + Sync>> =
             HashMap::new();
 
-        let in_tree_nvme_devices = find_in_tree_nvme_devices();
+        let lnr = kitfoxr::linux::nvme::scan();
 
-        for dev in in_tree_nvme_devices {
+        for dev in lnr {
             let args: IdentifierArgs = Default::default();
             let result = dev.send_identifier(&args);
 

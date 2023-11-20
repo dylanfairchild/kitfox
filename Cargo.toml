@@ -1,9 +1,11 @@
 [workspace]
 
 members = [
-    "kitfox",
+    "kitfox_raw",
+    "kitfox/src-tauri",
     "kitfoxd",
+    "kitfoxr",
     "kitfoxi",
     "kitfoxm",
-    "kitfoxm_derive",
+    "kitfoxm_derive"
 ]

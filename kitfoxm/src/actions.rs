@@ -1,6 +1,7 @@
 use super::error::Error;
 use paste::paste;
 use serde::{Deserialize, Serialize};
+use uuid;
 
 macro_rules! actions {
     ( $($x:ident $(Result {$($y:ident: $z:ty), *})? $(Args {$($a:ident: $b:ty), *})? $(CompleteArgs {$($c:ident: $d:ty), *})? $(ProgressResult {$($e:ident: $f:ty), *})? $(ProgressArgs {$($g:ident: $h:ty), *})? $(CancelResult {$($i:ident: $j:ty), *})? $(CancelArgs {$($k:ident: $l:ty), *})? $(PauseResult {$($m:ident: $n:ty), *})? $(PauseArgs {$($o:ident: $p:ty), *})? $(ResumeResult {$($q:ident: $r:ty), *})? $(ResumeArgs {$($s: ident: $t:ty), *})?), *) => {
@@ -21,6 +22,12 @@ macro_rules! actions {
                 fn send_supported_actions_cancel(&self, args: &SupportedActionsCancelArgs) -> SupportedActionsCancelResult;
                 fn send_supported_actions_pause(&self, args: &SupportedActionsPauseArgs) -> SupportedActionsPauseResult;
                 fn send_supported_actions_resume(&self, args: &SupportedActionsResumeArgs) -> SupportedActionsResumeResult;
+                fn send_identifier(&self, args: &IdentifierArgs) -> IdentifierResult;
+                fn send_identifier_complete(&self, args: &IdentifierCompleteArgs) -> IdentifierCompleteResult;
+                fn send_identifier_progress(&self, args: &IdentifierProgressArgs) -> IdentifierProgressResult;
+                fn send_identifier_cancel(&self, args: &IdentifierCancelArgs) -> IdentifierCancelResult;
+                fn send_identifier_pause(&self, args: &IdentifierPauseArgs) -> IdentifierPauseResult;
+                fn send_identifier_resume(&self, args: &IdentifierResumeArgs) -> IdentifierResumeResult;
             }
 
             #[derive(Serialize, Deserialize, Default, Debug)]
@@ -51,6 +58,18 @@ macro_rules! actions {
                 SupportedActionsCancelResult(SupportedActionsCancelResult),
                 SupportedActionsPauseResult(SupportedActionsPauseResult),
                 SupportedActionsResumeResult(SupportedActionsResumeResult),
+                IdentifierArgs(IdentifierArgs),
+                IdentifierCompleteArgs(IdentifierCompleteArgs),
+                IdentifierProgressArgs(IdentifierProgressArgs),
+                IdentifierCancelArgs(IdentifierCancelArgs),
+                IdentifierPauseArgs(IdentifierPauseArgs),
+                IdentifierResumeArgs(IdentifierResumeArgs),
+                IdentifierResult(IdentifierResult),
+                IdentifierCompleteResult(IdentifierCompleteResult),
+                IdentifierProgressResult(IdentifierProgressResult),
+                IdentifierCancelResult(IdentifierCancelResult),
+                IdentifierPauseResult(IdentifierPauseResult),
+                IdentifierResumeResult(IdentifierResumeResult),
                 $(
                     [<$x Args>]([<$x Args>]),
                     [<$x CompleteArgs>]([<$x CompleteArgs>]),
@@ -196,6 +215,7 @@ macro_rules! actions {
             pub struct SupportedActionsResult {
                 pub operation_identifier: Option<Result<OperationIdentifier, Error>>,
                 pub supported_actions: Option<Result<bool, Error>>,
+                pub identifier: Option<Result<bool, Error>>,
                 $(
                     pub [<$x:snake>]: Option<Result<bool, Error>>,
                 )*
@@ -275,6 +295,104 @@ macro_rules! actions {
                     SupportedActionsResumeResult { resumed: Some(Err(Error::not_implemented())), ..Default::default() }
                 }
             }
+
+            // Identifier is a special action because we want to specify a specific
+            // implementation for its related structures. This way we can specify a
+            // Default implementation which makes more sense for IdentifierResult.
+            #[derive(Serialize, Deserialize, Debug)]
+            pub struct IdentifierResult {
+                pub args: Option<IdentifierArgs>,
+                pub operation_identifier: Option<Result<OperationIdentifier, Error>>,
+                pub identifier: Option<Result<ResourceIdentifier, Error>>
+            }
+
+            impl Default for IdentifierResult {
+                fn default() -> Self {
+                    IdentifierResult {
+                        args: None,
+                        operation_identifier: None,
+                        identifier: Some(Ok(ResourceIdentifier(String::from(format!("{}", uuid::Uuid::new_v4())))))
+                    }
+                }
+            }
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierArgs {
+                pub asynchronous: Option<bool>,
+            }
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierCompleteResult {
+                pub args: Option<IdentifierCompleteArgs>,
+                pub result: Option<Result<IdentifierResult, Error>>,
+            }
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierCompleteArgs {}
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierProgressResult {
+                pub args: Option<IdentifierProgressArgs>,
+                pub progress: Option<Result<u32, Error>>,
+            }
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierProgressArgs {}
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierCancelResult {
+                pub args: Option<IdentifierCancelArgs>,
+                pub cancelled: Option<Result<bool, Error>>
+            }
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierCancelArgs {}
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierPauseResult {
+                pub args: Option<IdentifierPauseArgs>,
+                pub paused: Option<Result<bool, Error>>,
+            }
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierPauseArgs {}
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierResumeResult {
+                pub args: Option<IdentifierResumeArgs>,
+                pub resumed: Option<Result<bool, Error>>
+            }
+
+            #[derive(Serialize, Deserialize, Default, Debug)]
+            pub struct IdentifierResumeArgs {}
+
+            pub trait Identifier {
+                fn identifier(&self, args: &IdentifierArgs) -> IdentifierResult;
+                fn identifier_complete(&self, args: &IdentifierCompleteArgs) -> IdentifierCompleteResult {
+                    _ = args;
+                    IdentifierCompleteResult { result: Some(Err(Error::not_implemented())), ..Default::default() }
+                }
+
+                fn identifier_progress(&self, args: &IdentifierProgressArgs) -> IdentifierProgressResult {
+                    _ = args;
+                    IdentifierProgressResult { progress: Some(Err(Error::not_implemented())), ..Default::default() }
+                }
+
+                fn identifier_cancel(&self, args: &IdentifierCancelArgs) -> IdentifierCancelResult {
+                    _ = args;
+                    IdentifierCancelResult { cancelled: Some(Err(Error::not_implemented())), ..Default::default() }
+                }
+
+                fn identifier_pause(&self, args: &IdentifierPauseArgs) -> IdentifierPauseResult {
+                    _ = args;
+                    IdentifierPauseResult { paused: Some(Err(Error::not_implemented())), ..Default::default() }
+                }
+
+                fn identifier_resume(&self, args: &IdentifierResumeArgs) -> IdentifierResumeResult {
+                    _ = args;
+                    IdentifierResumeResult { resumed: Some(Err(Error::not_implemented())), ..Default::default() }
+                }
+            }
         }
     };
 }
@@ -292,17 +410,55 @@ pub struct ResourceIdentifier(pub String);
 // implementation in the Resource derive macro. Using the macro lets you
 // specify the important bits while taking care of all the boilerplate and naming
 // requirements.
+//
+// SupportedActions and Identifier are manually defined so do not need to be
+// included in this macro listing.
 
 actions!(
-    Identifier
-    Result {
-        identifier: ResourceIdentifier
-    },
-
     Identify
     Result {
-        name: String
+        name: String,
+        serial: String,
+        model: String,
+        firmware: String
+    },
+
+    Health
+    Result {
+        disposition: HealthDisposition,
+        tasks: HousekeepingTasks,
+        data_units_written: u128,
+        data_units_read: u128,
+        percentage_used: u8,
+        critical_bits: Vec<CriticalBits>,
+        update_available: bool
     },
 
     Erase
 );
+
+#[derive(Serialize, Deserialize, Default, Debug)]
+pub enum HealthDisposition {
+    #[default]
+    Excellent,
+    Good,
+    Poor,
+    Critical,
+}
+
+#[derive(Serialize, Deserialize, Default, Debug)]
+pub enum HousekeepingTasks {
+    #[default]
+    None,
+}
+
+#[derive(Serialize, Deserialize, Default, Debug)]
+pub enum CriticalBits {
+    #[default]
+    SpareBelowThreshold,
+    Temperature,
+    SubsystemDegraded,
+    ReadOnlyMode,
+    VolatileBackupFailed,
+    PersistentMemoryRegionUnreliable,
+}
